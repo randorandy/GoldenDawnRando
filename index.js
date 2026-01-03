@@ -79,8 +79,10 @@ const b64toBlob = (b64Data, contentType='', sliceSize=512) => {
 }
 
 function setup_roll_button() {
+    console.log("   -------  setup_roll_button");
     const roll_button = document.getElementById("roll-button");
     roll_button.addEventListener("click", async () => {
+        const activated_trick_names = [];
         const visibility_box = document.getElementById("visibility");
         const params = {
             "visibility": visibility_box.checked,
@@ -88,7 +90,11 @@ function setup_roll_button() {
         roll_button.disabled = true;
         const status_div = document.getElementById("status");
         status_div.innerText = "rolling...";
-        await sleep(0.1);
+        await sleep(0.01);
+        const python_roll1_function = pyscript.interpreter.globals.get('roll1');
+        const python_roll2_function = pyscript.interpreter.globals.get('roll2');
+        const python_roll3_function = pyscript.interpreter.globals.get('roll3');
+        const python_roll4_function = pyscript.interpreter.globals.get('roll4');
         const roll1_success = python_roll1_function();
         if (! roll1_success) {
             console.log("roll1 failed");
@@ -96,9 +102,9 @@ function setup_roll_button() {
             roll_button.disabled = false;
             return;
         }
-        await sleep(0.1)
+        await sleep(0.01)
         python_roll2_function(JSON.stringify(params));
-        await sleep(0.05)
+        await sleep(0.01)
         const roll3_success = python_roll3_function();
         if (! roll3_success) {
             console.log("roll3 failed");
@@ -106,19 +112,19 @@ function setup_roll_button() {
             roll_button.disabled = false;
             return;
         }
-        await sleep(0.05);
+        await sleep(0.01);
         python_roll4_function();
-        await sleep(0.05);
+        await sleep(0.01);
 
         if (modified_rom_data.length) {
-            await sleep(0.05);
+            await sleep(0.01);
             const data_blob = b64toBlob(modified_rom_data);
-            await sleep(0.05);
+            await sleep(0.01);
 
             // rom download link
             const a = document.createElement("a");
             a.href = URL.createObjectURL(data_blob);
-            await sleep(0.05);
+            await sleep(0.01);
             const filename = rom_name || "SubFileNameError.sfc";
             console.log(filename);
             a.setAttribute("download", filename);
