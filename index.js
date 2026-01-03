@@ -79,19 +79,16 @@ const b64toBlob = (b64Data, contentType='', sliceSize=512) => {
 }
 
 function setup_roll_button() {
-    console.log("   -------  setup_roll_button");
     const roll_button = document.getElementById("roll-button");
     roll_button.addEventListener("click", async () => {
-        const activated_trick_names = [];
-
+        const visibility_box = document.getElementById("visibility");
+        const params = {
+            "visibility": visibility_box.checked,
+        }
         roll_button.disabled = true;
         const status_div = document.getElementById("status");
         status_div.innerText = "rolling...";
         await sleep(0.1);
-        const python_roll1_function = pyscript.interpreter.globals.get('roll1');
-        //const python_roll2_function = pyscript.interpreter.globals.get('roll2');
-        const python_roll3_function = pyscript.interpreter.globals.get('roll3');
-        const python_roll4_function = pyscript.interpreter.globals.get('roll4');
         const roll1_success = python_roll1_function();
         if (! roll1_success) {
             console.log("roll1 failed");
