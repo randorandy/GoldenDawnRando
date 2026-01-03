@@ -5,7 +5,7 @@ import argparse
 
 from connection_data import SunkenNestL, VanillaAreas
 from fillInterface import FillAlgorithm
-from game import Game
+from game import Game, GameOptions
 from item_data import Item, Items, items_unpackable
 from loadout import Loadout
 from location_data import Location, pullCSV, spacePortLocs
@@ -17,13 +17,15 @@ from romWriter import RomWriter
 from solver import solve
 
 
-def plmidFromHiddenness(itemArray, hiddenness) -> bytes:
+def plmidFromHiddenness(itemArray, hiddenness, visible = True) -> bytes:
     if hiddenness == "open":
         plmid = itemArray[1]
     elif hiddenness == "chozo":
         plmid = itemArray[2]
     else:
         plmid = itemArray[3]
+    if visible:
+        plmid = itemArray[1]
     return plmid
 
 def write_location(romWriter: RomWriter, location: Location) -> None:
@@ -54,11 +56,12 @@ fillers: dict[str, Type[FillAlgorithm]] = {
 
 # main program
 def Main(argv: list[str], romWriter: Optional[RomWriter] = None) -> None:
-    game = generate()
+    options = GameOptions(False)
+    game = generate(options)
     rom_name = write_rom(game)
     write_spoiler_file(game, rom_name)
 
-def generate() -> Game:
+def generate(options: GameOptions) -> Game:
     logicChoice = "E"
     fillChoice = "D"
     areaA = ""
@@ -74,16 +77,13 @@ def generate() -> Game:
     randomizeAttempts = 0
     game = Game(Expert,
                 csvdict,
-                areaA == "A",
+                options.visibility,
                 VanillaAreas(),
                 seeeed)
     while not seedComplete :
-        if game.area_rando:  # area rando
-            game.connections = areaRando.RandomizeAreas()
-            # print(Connections) #test
         randomizeAttempts += 1
-        if randomizeAttempts > 10:
-            print("Giving up after 10 attempts. Help?")
+        if randomizeAttempts > 30:
+            print("Giving up after 30 attempts. Help?")
             break
         print("Starting randomization attempt:", randomizeAttempts)
         game.item_placement_spoiler = ""
@@ -136,9 +136,6 @@ def assumed_fill(game: Game) -> tuple[bool]:
 def write_rom(game: Game, romWriter: Optional[RomWriter] = None) -> str:
     
     logicChoice = "E"
-
-    areaA = ""
-
 
     rom_name = f"Golden{game.seed}.sfc"
     rom1_path = f"roms/{rom_name}"
@@ -262,8 +259,6 @@ def forward_fill(game: Game,
         availableLocations.remove(placeLocation)
         fill_algorithm.remove_from_pool(placeItem)
         loadout.append(placeItem)
-        if not ((placeLocation['fullitemname'] in spacePortLocs) or (Items.spaceDrop in loadout)):
-            loadout.append(Items.spaceDrop)
         spoilerSave += f"{placeLocation['fullitemname']} - - - {placeItem[0]}\n"
         # print(placeLocation['fullitemname']+placeItem[0])
 
