@@ -28,7 +28,7 @@ def plmidFromHiddenness(itemArray, hiddenness, visible = True) -> bytes:
         plmid = itemArray[1]
     return plmid
 
-def write_location(romWriter: RomWriter, location: Location) -> None:
+def write_location(romWriter: RomWriter, location: Location, visible = True) -> None:
     """
     provide a location with an ['item'] value, such as Missile, Super, etc
     write all rom locations associated with the item location
@@ -148,7 +148,7 @@ def write_rom(game: Game, romWriter: Optional[RomWriter] = None) -> str:
         romWriter.setBaseFilename(rom1_path[:-4].split("/")[-1])
 
     for loc in game.all_locations.values():
-        write_location(romWriter, loc)
+        write_location(romWriter, loc, game.visibility)
     #Ceres skip
     romWriter.writeBytes(0x16ebb, b"\x05")
 
