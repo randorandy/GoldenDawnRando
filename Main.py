@@ -36,7 +36,7 @@ def write_location(romWriter: RomWriter, location: Location, visible = True) -> 
     item = location["item"]
     assert item, f"{location['fullitemname']} didn't get an item"
     # TODO: support locations with no items?
-    plmid = plmidFromHiddenness(item, location['hiddenness'])
+    plmid = plmidFromHiddenness(item, location['hiddenness'], visible)
     for address in location['locids']:
         romWriter.writeItem(address, plmid, item[4])
     for address in location['alternateroomlocids']:
